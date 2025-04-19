@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Art Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f4f8; /* Light background for the whole page */
+            line-height: 1.6;
+        }
+
+        /* Container for the entire tool content */
+        #tool-content {
+            max-width: 1000px; /* Limit the maximum width */
+            margin: 0 auto; /* Center the container */
+            padding: 1rem;
+            background-color: #ffffff; /* White background for the content area */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+            border-radius: 0.5rem;
+        }
+
+        /* Style for the main title at the very top - Reduced font-size */
+        #main-tool-title {
+            text-align: center;
+            font-size: 1.5rem; /* Reduced font size (text-2xl equivalent) */
+            font-weight: bold;
+            color: #2d3748; /* Dark text color */
+            margin-bottom: 1.5rem; /* Adjusted space below the title */
+        }
+
+
+        /* Style for the art container */
+        #art-container {
+            width: 100%;
+            /* Responsive height for the art area */
+            height: 0;
+            padding-bottom: 75%; /* Maintain a 4:3 aspect ratio (adjust as needed) */
+            position: relative;
+            background-color: #ffffff; /* White background for art area */
+            border: 1px solid #cbd5e0; /* Add a subtle border */
+            border-radius: 0.5rem; /* Add slight rounded corners */
+            overflow: hidden; /* Ensure SVG stays within bounds */
+            margin-bottom: 2rem; /* Space below the art area */
+             display: flex; /* Use flex to center content if needed */
+             justify-content: center;
+             align-items: center;
+        }
+
+        /* Style for the SVG element to fill its container */
+        #generative-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block; /* Remove extra space below SVG */
+        }
+
+        /* Style for the controls section */
+        #controls-section {
+            padding: 0 1rem; /* Add horizontal padding */
+            margin-top: 2rem; /* Space above this section */
+        }
+
+        /* Style for the control panel */
+        #control-panel {
+            background-color: #f8fafc; /* Light background for controls */
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            margin-top: 1.5rem; /* Space above the control panel */
+        }
+
+        /* Style for slider value display */
+        .slider-value {
+            display: block;
+            text-align: right;
+            font-size: 0.875rem; /* Small text */
+            margin-top: 0.25rem;
+            color: #718096; /* Gray text */
+        }
+
+        /* Style for buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #4299e1; /* Blue */
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3182ce; /* Darker blue */
+        }
+
+         .btn-secondary {
+            background-color: #e2e8f0; /* Light gray */
+            color: #2d3748; /* Dark text */
+         }
+
+         .btn-secondary:hover {
+             background-color: #cbd5e0; /* Darker light gray */
+         }
+
+        /* Style for disabled button */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+         /* Style for select dropdown */
+         .select-custom {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #edf2f7; /* Light gray background */
+            color: #2d3748; /* Dark text */
+            border: 1px solid #cbd5e0;
+            font-size: 1rem;
+         }
+
+        /* Style for the AI Interpretation section */
+        #ai-interpretation-section {
+            margin-top: 2rem; /* Space above the section */
+            padding: 1.5rem;
+            background-color: #edf2f7; /* Light background */
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Style for the AI Interpretation label */
+        #ai-interpretation-section p:first-child {
+            font-style: italic;
+            font-weight: 600;
+            color: #4a5568; /* Darker gray */
+            margin-bottom: 0.5rem; /* Space below the label */
+        }
+
+        /* Style for the AI Interpretation text */
+        #ai-description {
+            font-style: normal; /* Ensure text is not italic */
+            color: #2d3748; /* Dark text color */
+            line-height: 1.6;
+            min-height: 1.6em; /* Ensure space for at least one line during typing */
+        }
+
+        /* Typing cursor animation */
+        #ai-description::after {
+            content: '|';
+            animation: blink-caret .75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #2d3748; } /* Cursor color */
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div id="tool-content">
+        <h1 id="main-tool-title">Generative Art Studio</h1>
+
+        <div id="art-container">
+            <svg id="generative-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+                </svg>
+             <div id="initial-message" class="absolute inset-0 flex items-center justify-center text-gray-500 text-lg pointer-events-none">
+                 Adjust parameters below and click "Generate Art"
+             </div>
+        </div>
+
+        <div id="ai-interpretation-section">
+            <p>AI Interpretation:</p>
+            <p id="ai-description">Adjust the parameters and generate art to see an interpretation...</p>
+        </div>
+
+
+        <div id="controls-section">
+             <div id="control-panel">
+                <h2 class="text-xl font-semibold mb-6 text-center text-gray-700">Parameters</h2>
+
+                <div class="mb-6">
+                    <label for="shape-type" class="block text-sm font-medium mb-2 text-gray-700">Shape Type:</label>
+                    <select id="shape-type" class="select-custom">
+                        <option value="circle">Circle</option>
+                        <option value="rect">Rectangle</option>
+                        <option value="mixed">Mixed</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label for="shape-count" class="block text-sm font-medium mb-2 text-gray-700">Number of Shapes:</label>
+                    <input type="range" id="shape-count" min="10" max="500" value="100" class="w-full">
+                    <span id="shape-count-value" class="slider-value">100</span>
+                </div>
+
+                <div class="mb-6">
+                    <label for="shape-size" class="block text-sm font-medium mb-2 text-gray-700">Max Shape Size:</label>
+                    <input type="range" id="shape-size" min="5" max="150" value="50" class="w-full">
+                     <span id="shape-size-value" class="slider-value">50</span>
+                </div>
+
+                 <div class="mb-6">
+                    <label for="shape-opacity" class="block text-sm font-medium mb-2 text-gray-700">Max Opacity:</label>
+                    <input type="range" id="shape-opacity" min="10" max="100" value="80" class="w-full">
+                     <span id="shape-opacity-value" class="slider-value">80</span>
+                </div>
+
+                <div class="mb-6">
+                    <label for="color-hue" class="block text-sm font-medium mb-2 text-gray-700">Base Color Hue:</label>
+                    <input type="range" id="color-hue" min="0" max="360" value="200" class="w-full">
+                     <span id="color-hue-value" class="slider-value">200</span>
+                </div>
+
+                 <div class="mb-6">
+                    <label for="color-saturation" class="block text-sm font-medium mb-2 text-gray-700">Color Saturation:</label>
+                    <input type="range" id="color-saturation" min="0" max="100" value="80" class="w-full">
+                     <span id="color-saturation-value" class="slider-value">80</span>
+                </div>
+
+                 <div class="mb-6">
+                    <label for="color-lightness" class="block text-sm font-medium mb-2 text-gray-700">Color Lightness:</label>
+                    <input type="range" id="color-lightness" min="0" max="100" value="60" class="w-full">
+                     <span id="color-lightness-value" class="slider-value">60</span>
+                </div>
+
+                <div class="mb-6">
+                    <label for="bg-color" class="block text-sm font-medium mb-2 text-gray-700">Background Color:</label>
+                    <input type="color" id="bg-color" value="#ffffff" class="w-full h-10">
+                 </div>
+
+
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+                    <button id="generate-btn" class="btn btn-primary flex-grow">
+                        Generate Art
+                    </button>
+                     <button id="save-btn" class="btn btn-secondary flex-grow">
+                        Save SVG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Get references to DOM elements
+        const shapeTypeSelect = document.getElementById('shape-type');
+        const shapeCountInput = document.getElementById('shape-count');
+        const shapeCountValue = document.getElementById('shape-count-value');
+        const shapeSizeInput = document.getElementById('shape-size');
+        const shapeSizeValue = document.getElementById('shape-size-value');
+        const shapeOpacityInput = document.getElementById('shape-opacity');
+        const shapeOpacityValue = document.getElementById('shape-opacity-value');
+        const colorHueInput = document.getElementById('color-hue');
+        const colorHueValue = document.getElementById('color-hue-value');
+        const colorSaturationInput = document.getElementById('color-saturation');
+        const colorSaturationValue = document.getElementById('color-saturation-value');
+        const colorLightnessInput = document.getElementById('color-lightness');
+        const colorLightnessValue = document.getElementById('color-lightness-value');
+        const bgColorInput = document.getElementById('bg-color');
+        const generateBtn = document.getElementById('generate-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const svgElement = document.getElementById('generative-svg');
+        const aiDescription = document.getElementById('ai-description');
+        const initialMessage = document.getElementById('initial-message');
+        const artContainer = document.getElementById('art-container');
+        const aiInterpretationSection = document.getElementById('ai-interpretation-section');
+        const mainToolTitle = document.getElementById('main-tool-title'); // Get reference to the main title
+
+
+        let typingInterval; // To store the interval for typing animation
+
+        // Function to update the displayed value next to sliders
+        function updateSliderValue(input, output) {
+            output.textContent = input.value;
+        }
+
+        // Function to generate abstract art based on controls
+        function generateArt() {
+            // Clear previous art
+            svgElement.innerHTML = '';
+            initialMessage.classList.add('hidden'); // Hide initial message
+
+            const shapeType = shapeTypeSelect.value;
+            const numShapes = parseInt(shapeCountInput.value);
+            const maxShapeSize = parseInt(shapeSizeInput.value);
+            const maxOpacity = parseInt(shapeOpacityInput.value) / 100;
+            const baseHue = parseInt(colorHueInput.value);
+            const baseSaturation = parseInt(colorSaturationInput.value);
+            const baseLightness = parseInt(colorLightnessInput.value);
+            const bgColor = bgColorInput.value;
+
+            const svgWidth = 1000; // Corresponds to viewBox
+            const svgHeight = 1000; // Corresponds to viewBox
+
+            // Set background color of the art container
+            artContainer.style.backgroundColor = bgColor;
+
+
+            for (let i = 0; i < numShapes; i++) {
+                // Determine shape type for this element
+                let currentShapeType = shapeType;
+                if (shapeType === 'mixed') {
+                    currentShapeType = Math.random() > 0.5 ? 'circle' : 'rect';
+                }
+
+                // Randomize shape properties within control limits
+                const size = Math.random() * maxShapeSize;
+                const x = Math.random() * svgWidth;
+                const y = Math.random() * svgHeight;
+                const opacity = Math.random() * maxOpacity;
+
+                // Vary color slightly around the base HSL values
+                const hue = (baseHue + (Math.random() * 60 - 30) + 360) % 360; // Vary hue by +/- 30, ensure positive
+                const saturation = Math.max(0, Math.min(100, baseSaturation + (Math.random() * 40 - 20))); // Vary saturation
+                const lightness = Math.max(0, Math.min(100, baseLightness + (Math.random() * 40 - 20))); // Vary lightness
+
+                const color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+                let shapeElement;
+                if (currentShapeType === 'circle') {
+                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    shapeElement.setAttribute('cx', x);
+                    shapeElement.setAttribute('cy', y);
+                    shapeElement.setAttribute('r', size / 2); // Radius is half of size
+                } else { // rect
+                     shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                     shapeElement.setAttribute('x', x - size / 2); // Center rectangle
+                     shapeElement.setAttribute('y', y - size / 2);
+                     shapeElement.setAttribute('width', size);
+                     shapeElement.setAttribute('height', size);
+                     shapeElement.setAttribute('rx', size / 5); // Rounded corners for rectangles
+                     shapeElement.setAttribute('ry', size / 5);
+                }
+
+                shapeElement.setAttribute('fill', color);
+                shapeElement.setAttribute('opacity', opacity);
+                 shapeElement.style.transition = 'opacity 0.5s ease-out'; // Fade-in transition
+                 shapeElement.style.opacity = 0; // Start invisible
+
+
+                svgElement.appendChild(shapeElement);
+
+                 // Trigger fade-in animation after adding to DOM
+                 setTimeout(() => {
+                     shapeElement.style.opacity = opacity;
+                 }, 10); // Small delay to allow DOM attachment
+
+
+            }
+
+            // Update AI description (Simulated) with typing animation
+            const interpretationText = getInterpretationText(shapeType, numShapes, baseHue, baseSaturation, baseLightness);
+            typeAIDescription(interpretationText);
+
+
+            // Scroll to the art container
+            artContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Function to generate the simulated AI description text
+        function getInterpretationText(shapeType, numShapes, hue, saturation, lightness) {
+            let description = `An abstract composition with ${numShapes} ${shapeType} shapes.`;
+
+            if (hue > 240 || hue < 60) { // Blue or Red/Pink hues
+                 description += ` Dominated by cool tones.`;
+            } else if (hue >= 60 && hue <= 180) { // Green to Cyan hues
+                 description += ` Featuring fresh, vibrant colors.`;
+            } else { // Yellow to Orange hues
+                 description += ` With warm, energetic hues.`;
+            }
+
+            if (saturation > 70) {
+                description += ` Highly saturated and vivid.`;
+            } else if (saturation < 30) {
+                description += ` With muted, subtle colors.`;
+            }
+
+             if (lightness > 70) {
+                 description += ` A bright and airy feel.`;
+             } else if (lightness < 30) {
+                 description += ` A deep and moody atmosphere.`;
+             }
+
+            return description;
+        }
+
+        // Function to create the typing animation
+        function typeAIDescription(text) {
+            clearInterval(typingInterval); // Clear any existing typing animation
+            aiDescription.textContent = ''; // Clear current text
+            let i = 0;
+            typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    aiDescription.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typingInterval); // Stop typing when done
+                }
+            }, 30); // Typing speed (milliseconds per character)
+        }
+
+
+        // Function to save the generated SVG
+        function saveSvg() {
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generative-art.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url); // Clean up
+        }
+
+
+        // Event listeners for sliders to update value display
+        shapeCountInput.addEventListener('input', () => updateSliderValue(shapeCountInput, shapeCountValue));
+        shapeSizeInput.addEventListener('input', () => updateSliderValue(shapeSizeInput, shapeSizeValue));
+        shapeOpacityInput.addEventListener('input', () => updateSliderValue(shapeOpacityInput, shapeOpacityValue));
+        colorHueInput.addEventListener('input', () => updateSliderValue(colorHueInput, colorHueValue));
+        colorSaturationInput.addEventListener('input', () => updateSliderValue(colorSaturationInput, colorSaturationValue));
+        colorLightnessInput.addEventListener('input', () => updateSliderValue(colorLightnessInput, colorLightnessValue));
+
+
+        // Event listener for the generate button
+        generateBtn.addEventListener('click', generateArt);
+
+         // Event listener for the save button
+        saveBtn.addEventListener('click', saveSvg);
+
+
+        // Initial update of slider values on page load
+        updateSliderValue(shapeCountInput, shapeCountValue);
+        updateSliderValue(shapeSizeInput, shapeSizeValue);
+        updateSliderValue(colorHueInput, colorHueValue);
+        updateSliderValue(colorSaturationInput, colorSaturationValue);
+        updateSliderValue(colorLightnessInput, colorLightnessValue);
+        updateSliderValue(shapeOpacityInput, shapeOpacityValue);
+
+
+        // Optional: Generate initial art on page load
+        // generateArt();
+    </script>
+
+</body>
+</html>
