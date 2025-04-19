@@ -42,11 +42,12 @@
             flex-shrink: 0; /* Prevent header from shrinking */
         }
 
-        /* Main content area for different sections */
+        /* Main content area for different sections - Added padding-bottom */
         .app-section {
             flex-grow: 1; /* Allow section to take up remaining space */
             overflow-y: auto; /* Enable vertical scrolling for each section */
             padding: 1rem;
+            padding-bottom: 4rem; /* Add padding to the bottom equal to nav height */
             display: none; /* Hide sections by default */
         }
 
@@ -74,7 +75,7 @@
             margin-bottom: 1.5rem; /* Space below this section */
         }
 
-        /* Bottom navigation bar */
+        /* Bottom navigation bar - Added fixed positioning */
         #bottom-nav {
             background-color: #ffffff; /* White background */
             border-top: 1px solid #e2e8f0; /* Separator line */
@@ -83,6 +84,17 @@
             justify-around; /* Keep justify-around for spacing between items */
             align-items: center;
             flex-shrink: 0; /* Prevent nav from shrinking */
+            width: 100%; /* Ensure it spans the full width of its container */
+            position: fixed; /* Fix position on the screen */
+            bottom: 0; /* Align to the bottom */
+            left: 0; /* Align to the left */
+            right: 0; /* Align to the right */
+            z-index: 10; /* Ensure it's above other content */
+            max-width: 400px; /* Match the max-width of #mobile-screen */
+            margin: 0 auto; /* Center the fixed nav */
+            border-bottom-left-radius: 0.75rem; /* Match screen border radius */
+            border-bottom-right-radius: 0.75rem; /* Match screen border radius */
+            height: 4rem; /* Give it a defined height */
         }
 
         /* Navigation item style - Added flex-grow */
@@ -282,10 +294,11 @@
             });
         });
 
-        // Show the default section on page load (Feed)
-        // showSection('feed-section'); // Already active in HTML, but uncomment if changing default
+        // Show the default section on page load (Feed) - Already active in HTML
+        // showSection('feed-section');
 
     </script>
 
 </body>
-</html>
+    </html>
+    
